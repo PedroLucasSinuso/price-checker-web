@@ -1,4 +1,5 @@
 import Login from './pages/Login'
+import Busca from './pages/Busca'
 
 function isAuthenticated() {
   return !!localStorage.getItem('token')
@@ -11,11 +12,7 @@ function App() {
     return <Login />
   }
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <h1 className="text-2xl font-bold text-gray-800">Em construção...</h1>
-    </div>
-  )
+  return <Busca />
 }
 
 export default App
