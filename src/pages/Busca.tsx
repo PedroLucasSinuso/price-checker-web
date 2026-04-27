@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { buscarProduto } from '../api/produtos'
 import type { ProdutoBasico, ProdutoCompleto } from '../types'
 import { logout } from '../api/auth'
+import LeitorCodigo from '../components/LeitorCodigo'
 
 function isCompleto(p: ProdutoBasico | ProdutoCompleto): p is ProdutoCompleto {
   return 'preco_custo' in p
@@ -12,14 +13,16 @@ export default function Busca() {
   const [produto, setProduto] = useState<ProdutoBasico | ProdutoCompleto | null>(null)
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
+  const [cameras, setCameras] = useState(false)
 
-  async function handleBuscar() {
-    if (!codigo.trim()) return
+  async function handleBuscar(codigoParam?: string) {
+    const valor = (codigoParam ?? codigo).trim()
+    if (!valor) return
     setErro('')
     setProduto(null)
     setLoading(true)
     try {
-      const data = await buscarProduto(codigo.trim())
+      const data = await buscarProduto(valor)
       setProduto(data)
     } catch (e: any) {
       if (e.response?.status === 404) setErro('Produto não encontrado.')
@@ -30,8 +33,21 @@ export default function Busca() {
     }
   }
 
+  function handleLeitura(codigoLido: string) {
+    setCameras(false)
+    setCodigo(codigoLido)
+    handleBuscar(codigoLido)
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center px-4 py-10">
+
+      {cameras && (
+        <LeitorCodigo
+          onLeitura={handleLeitura}
+          onFechar={() => setCameras(false)}
+        />
+      )}
 
       {/* Header */}
       <div className="w-full max-w-md flex justify-between items-center mb-8">
@@ -54,8 +70,16 @@ export default function Busca() {
           onKeyDown={(e) => e.key === 'Enter' && handleBuscar()}
           autoFocus
         />
+        {/* Botão câmera — só aparece em mobile */}
         <button
-          onClick={handleBuscar}
+          onClick={() => setCameras(true)}
+          className="md:hidden bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg transition"
+          title="Ler código de barras"
+        >
+          📷
+        </button>
+        <button
+          onClick={() => handleBuscar()}
           disabled={loading}
           className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition disabled:opacity-50"
         >
@@ -63,12 +87,10 @@ export default function Busca() {
         </button>
       </div>
 
-      {/* Erro */}
       {erro && (
         <p className="text-red-500 text-sm mb-4">{erro}</p>
       )}
 
-      {/* Resultado */}
       {produto && (
         <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-6 flex flex-col gap-3">
           <div>
@@ -94,6 +116,11 @@ export default function Busca() {
             </p>
           </div>
 
+          <div className="border-t pt-3">
+            <p className="text-xs text-gray-400 uppercase tracking-wide">Estoque</p>
+            <p className="text-sm font-semibold text-gray-700">{produto.estoque} un.</p>
+          </div>
+
           {isCompleto(produto) && (
             <>
               <div className="flex gap-4 border-t pt-3">
@@ -103,14 +130,20 @@ export default function Busca() {
                     {produto.preco_custo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </p>
                 </div>
+              </div>
+              <div className="flex gap-4">
                 <div>
                   <p className="text-xs text-gray-400 uppercase tracking-wide">Markup</p>
-                  <p className="text-sm font-semibold text-gray-700">{produto.markup.toFixed(2)}%</p>
+                  <p className="text-sm font-semibold text-gray-700">
+                    {(produto.markup * 100).toFixed(2)}%
+                  </p>
                 </div>
-              </div>
-              <div className="border-t pt-3">
-                <p className="text-xs text-gray-400 uppercase tracking-wide">Estoque</p>
-                <p className="text-sm font-semibold text-gray-700">{produto.estoque} un.</p>
+                <div>
+                  <p className="text-xs text-gray-400 uppercase tracking-wide">Margem</p>
+                  <p className="text-sm font-semibold text-gray-700">
+                    {(produto.margem * 100).toFixed(2)}%
+                  </p>
+                </div>
               </div>
             </>
           )}
