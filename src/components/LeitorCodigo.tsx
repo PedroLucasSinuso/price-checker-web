@@ -8,19 +8,18 @@ interface Props {
 
 export default function LeitorCodigo({ onLeitura, onFechar }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const readerRef = useRef<BrowserMultiFormatReader | null>(null)
   const [erro, setErro] = useState('')
+  const leuRef = useRef(false)
 
   useEffect(() => {
     const reader = new BrowserMultiFormatReader()
-    readerRef.current = reader
+    leuRef.current = false
 
-    reader.decodeFromVideoDevice(undefined, videoRef.current!, (result, err) => {
-      if (result) {
+    reader.decodeFromVideoDevice(undefined, videoRef.current!, (result) => {
+      if (result && !leuRef.current) {
+        leuRef.current = true
+        BrowserMultiFormatReader.releaseAllStreams()
         onLeitura(result.getText())
-      }
-      if (err && !(err.message?.includes('No MultiFormat Readers'))) {
-        // erros de "nenhum código encontrado no frame" são normais — ignora
       }
     }).catch(() => {
       setErro('Não foi possível acessar a câmera. Verifique as permissões.')
@@ -34,11 +33,8 @@ export default function LeitorCodigo({ onLeitura, onFechar }: Props) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50 px-4">
       <div className="w-full max-w-sm bg-black rounded-2xl overflow-hidden">
-
-        {/* Viewfinder */}
         <div className="relative">
           <video ref={videoRef} className="w-full" autoPlay muted playsInline />
-          {/* Mira central */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="w-48 h-24 border-2 border-white rounded-lg opacity-60" />
           </div>
@@ -53,7 +49,10 @@ export default function LeitorCodigo({ onLeitura, onFechar }: Props) {
             Aponte para o código de barras
           </p>
           <button
-            onClick={onFechar}
+            onClick={() => {
+              BrowserMultiFormatReader.releaseAllStreams()
+              onFechar()
+            }}
             className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 rounded-lg transition"
           >
             Cancelar
