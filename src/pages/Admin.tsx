@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { triggerSync, getSyncStatus, getSyncHistory } from '../api/admin'
-import { logout } from '../api/auth'
+import AdminHeader from '../components/AdminHeader'
 
 interface SyncJob {
   job_id: number
@@ -102,15 +102,7 @@ export default function Admin() {
     <div className="min-h-screen bg-gray-100 flex flex-col items-center px-4 py-10">
 
       {/* Header */}
-      <div className="w-full max-w-2xl flex justify-between items-center mb-8">
-        <h1 className="text-xl font-bold text-gray-800">Price Checker — Admin</h1>
-        <button
-          onClick={logout}
-          className="text-sm text-gray-500 hover:text-red-500 transition"
-        >
-          Sair
-        </button>
-      </div>
+      <AdminHeader titulo="Sync ETL" />
 
       {/* Trigger sync */}
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-md p-6 mb-6">
