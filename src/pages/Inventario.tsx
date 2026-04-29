@@ -84,7 +84,7 @@ export default function Inventario() {
         />
       )}
 
-      <AdminHeader titulo="Inventário" />
+      <AdminHeader titulo="Inventário" paginaAtual="inventario" />
 
       <div className="w-full max-w-2xl flex flex-col gap-6">
 

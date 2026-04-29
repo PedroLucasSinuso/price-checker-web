@@ -102,7 +102,7 @@ export default function Admin() {
     <div className="min-h-screen bg-gray-100 flex flex-col items-center px-4 py-10">
 
       {/* Header */}
-      <AdminHeader titulo="Sync ETL" />
+      <AdminHeader titulo="Sync ETL" paginaAtual="sync" />
 
       {/* Trigger sync */}
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-md p-6 mb-6">

@@ -75,7 +75,7 @@ export default function Etiquetas() {
         />
       )}
 
-      <AdminHeader titulo="Etiquetas" />
+      <AdminHeader titulo="Etiquetas" paginaAtual="etiquetas" />
 
       <div className="w-full max-w-2xl flex flex-col gap-6">
 

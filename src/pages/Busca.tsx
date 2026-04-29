@@ -15,6 +15,8 @@ export default function Busca() {
   const [loading, setLoading] = useState(false)
   const [cameras, setCameras] = useState(false)
 
+  const role = localStorage.getItem('role')
+
   async function handleBuscar(codigoParam?: string) {
     const valor = (codigoParam ?? codigo).trim()
     if (!valor) return
@@ -51,7 +53,17 @@ export default function Busca() {
 
       {/* Header */}
       <div className="w-full max-w-md flex justify-between items-center mb-8">
-        <h1 className="text-xl font-bold text-gray-800">Price Checker</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-xl font-bold text-gray-800">Price Checker</h1>
+          {role === 'admin' && (
+            <button
+              onClick={() => window.location.href = '/admin'}
+              className="text-sm text-gray-500 hover:text-blue-600 transition"
+            >
+              ← Painel Admin
+            </button>
+          )}
+        </div>
         <button
           onClick={logout}
           className="text-sm text-gray-500 hover:text-red-500 transition"
@@ -70,7 +82,6 @@ export default function Busca() {
           onKeyDown={(e) => e.key === 'Enter' && handleBuscar()}
           autoFocus
         />
-        {/* Botão câmera — só aparece em mobile */}
         <button
           onClick={() => setCameras(true)}
           className="md:hidden bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg transition"
