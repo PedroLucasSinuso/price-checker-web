@@ -1,5 +1,5 @@
 import api from './client'
-import type { AuthToken } from '../types'
+import type { AuthToken, Role } from '../types'
 
 export async function login(username: string, password: string): Promise<AuthToken> {
   const params = new URLSearchParams()
@@ -12,12 +12,12 @@ export async function login(username: string, password: string): Promise<AuthTok
   return response.data
 }
 
-export function logout() {
+export function logout(navigate: (path: string) => void) {
   localStorage.removeItem('token')
   localStorage.removeItem('role')
-  window.location.href = '/login'
+  navigate('/login')
 }
 
-export function getRole(): string | null {
-  return localStorage.getItem('role')
+export function getRole(): Role | null {
+  return localStorage.getItem('role') as Role | null
 }

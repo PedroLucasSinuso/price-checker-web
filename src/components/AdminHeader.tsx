@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { logout } from '../api/auth'
 
 interface Props {
@@ -6,7 +7,7 @@ interface Props {
 }
 
 export default function AdminHeader({ titulo, paginaAtual }: Props) {
-  const navegar = (path: string) => window.location.href = path
+  const navigate = useNavigate()
 
   const linkClass = (pagina: string) =>
     `text-sm transition ${paginaAtual === pagina
@@ -19,23 +20,23 @@ export default function AdminHeader({ titulo, paginaAtual }: Props) {
       <div className="flex justify-between items-center mb-3">
         <h1 className="text-xl font-bold text-gray-800">{titulo}</h1>
         <button
-          onClick={logout}
+          onClick={() => logout(navigate)}
           className="text-sm text-gray-500 hover:text-red-500 transition"
         >
           Sair
         </button>
       </div>
       <nav className="flex gap-6 border-b pb-3">
-        <button onClick={() => navegar('/admin')} className={linkClass('sync')}>
+        <button onClick={() => navigate('/admin')} className={linkClass('sync')}>
           Sync
         </button>
-        <button onClick={() => navegar('/etiquetas')} className={linkClass('etiquetas')}>
+        <button onClick={() => navigate('/admin/etiquetas')} className={linkClass('etiquetas')}>
           Etiquetas
         </button>
-        <button onClick={() => navegar('/inventario')} className={linkClass('inventario')}>
+        <button onClick={() => navigate('/admin/inventario')} className={linkClass('inventario')}>
           Inventário
         </button>
-        <button onClick={() => navegar('/')} className={linkClass('busca')}>
+        <button onClick={() => navigate('/')} className={linkClass('busca')}>
           Busca
         </button>
       </nav>

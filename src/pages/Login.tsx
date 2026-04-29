@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { login } from '../api/auth'
 import { jwtDecode } from 'jwt-decode'
 import type { JwtPayload } from '../types'
 
 export default function Login() {
+  const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -17,7 +19,7 @@ export default function Login() {
       const decoded = jwtDecode<JwtPayload>(data.access_token)
       localStorage.setItem('token', data.access_token)
       localStorage.setItem('role', decoded.role)
-      window.location.href = '/'
+      navigate('/', { replace: true })
     } catch {
       setError('Usuário ou senha inválidos.')
     } finally {

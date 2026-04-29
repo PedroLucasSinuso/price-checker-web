@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { buscarProduto } from '../api/produtos'
 import type { ProdutoBasico, ProdutoCompleto } from '../types'
 import { logout } from '../api/auth'
@@ -10,6 +11,7 @@ function isCompleto(p: ProdutoBasico | ProdutoCompleto): p is ProdutoCompleto {
 }
 
 export default function Busca() {
+  const navigate = useNavigate()
   const [codigo, setCodigo] = useState('')
   const [produto, setProduto] = useState<ProdutoBasico | ProdutoCompleto | null>(null)
   const [erro, setErro] = useState('')
@@ -58,7 +60,7 @@ export default function Busca() {
           <h1 className="text-xl font-bold text-gray-800">Price Checker</h1>
           {role === 'admin' && (
             <button
-              onClick={() => window.location.href = '/admin'}
+              onClick={() => navigate('/admin')}
               className="text-sm text-gray-500 hover:text-blue-600 transition"
             >
               ← Painel Admin
@@ -66,7 +68,7 @@ export default function Busca() {
           )}
         </div>
         <button
-          onClick={logout}
+          onClick={() => logout(navigate)}
           className="text-sm text-gray-500 hover:text-red-500 transition"
         >
           Sair

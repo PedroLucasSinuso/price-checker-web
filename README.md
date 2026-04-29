@@ -88,15 +88,15 @@ src/
 
 ### Phase 2: React Router
 
-- [ ] Instalar `react-router-dom`
-- [ ] Criar `components/ProtectedRoute.tsx`
-- [ ] Criar componentes `ui/Button.tsx` e `ui/Input.tsx`
-- [ ] Configurar `<BrowserRouter>` em `App.tsx`
-- [ ] Definir rotas: `/login`, `/`, `/admin`, `/admin/etiquetas`, `/admin/inventario`
-- [ ] Substituir `window.location.href` por `useNavigate()`
-- [ ] Logout via `navigate()` sem reload
-- [ ] Interceptor 401 redireciona via navigate
-- [ ] Criar página `NotFound.tsx`
+- [x] Instalar `react-router-dom`
+- [x] Criar `components/ProtectedRoute.tsx`
+- [x] Criar componentes `ui/Button.tsx` e `ui/Input.tsx`
+- [x] Configurar `<BrowserRouter>` em `App.tsx`
+- [x] Definir rotas: `/login`, `/`, `/admin`, `/admin/etiquetas`, `/admin/inventario`
+- [x] Substituir `window.location.href` por `useNavigate()`
+- [x] Logout via `navigate()` sem reload
+- [ ] Interceptor 401 redireciona via navigate (adiado para Phase 3)
+- [x] Criar página `NotFound.tsx`
 
 ### Phase 3: Auth Hook
 
