@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 
 interface Props {
   titulo: string
-  paginaAtual: 'sync' | 'etiquetas' | 'inventario' | 'busca'
+  paginaAtual: 'sync' | 'etiquetas' | 'inventario' | 'busca' | 'usuarios'
   onLogout: () => void
 }
 
@@ -38,6 +38,9 @@ export default function AdminHeader({ titulo, paginaAtual, onLogout }: Props) {
         </button>
         <button onClick={() => navigate('/')} className={linkClass('busca')}>
           Busca
+        </button>
+        <button onClick={() => navigate('/admin/usuarios')} className={linkClass('usuarios')}>
+          Usuários
         </button>
       </nav>
     </div>
