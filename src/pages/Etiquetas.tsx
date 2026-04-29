@@ -5,6 +5,7 @@ import AdminHeader from '../components/AdminHeader'
 import LeitorCodigo from '../components/LeitorCodigo'
 import { useAuth } from '../hooks/useAuth'
 import { gerarCSV, baixarCSV, type CsvRow } from '../utils/csv'
+import { useLocalStorage } from '../hooks/useLocalStorage'
 
 interface ItemEtiqueta {
   codigo: string
@@ -14,7 +15,7 @@ interface ItemEtiqueta {
 export default function Etiquetas() {
   const navigate = useNavigate()
   const { logout } = useAuth()
-  const [itens, setItens] = useState<ItemEtiqueta[]>([])
+  const [itens, setItens] = useLocalStorage<ItemEtiqueta[]>('etiquetas_lista', [])
   const [erro, setErro] = useState('')
   const [camera, setCamera] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)

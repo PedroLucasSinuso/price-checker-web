@@ -5,6 +5,7 @@ import AdminHeader from '../components/AdminHeader'
 import LeitorCodigo from '../components/LeitorCodigo'
 import { useAuth } from '../hooks/useAuth'
 import { gerarCSV, baixarCSV, type CsvRow } from '../utils/csv'
+import { useLocalStorage } from '../hooks/useLocalStorage'
 
 interface ItemInventario {
   codigo: string
@@ -15,7 +16,7 @@ interface ItemInventario {
 export default function Inventario() {
   const navigate = useNavigate()
   const { logout } = useAuth()
-  const [itens, setItens] = useState<ItemInventario[]>([])
+  const [itens, setItens] = useLocalStorage<ItemInventario[]>('inventario_lista', [])
   const [erro, setErro] = useState('')
   const [camera, setCamera] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)

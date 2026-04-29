@@ -11,3 +11,6 @@ export async function buscarProduto(codigo: string): Promise<ProdutoBasico | Pro
   const response = await api.get(endpoint)
   return response.data
 }
+export async function registrarNaoEncontrado(codigo: string, observacao: string) {
+  await api.post('/produtos/nao-encontrado', { codigo, observacao })
+}

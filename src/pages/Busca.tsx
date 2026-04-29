@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { buscarProduto } from '../api/produtos'
+import { buscarProduto, registrarNaoEncontrado } from '../api/produtos'
 import type { ProdutoBasico, ProdutoCompleto } from '../types'
 import { useAuth } from '../hooks/useAuth'
 import LeitorCodigo from '../components/LeitorCodigo'
@@ -18,6 +18,9 @@ export default function Busca() {
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
   const [cameras, setCameras] = useState(false)
+  const [codigoNaoEncontrado, setCodigoNaoEncontrado] = useState<string | null>(null)
+  const [observacao, setObservacao] = useState('')
+  const [enviandoObs, setEnviandoObs] = useState(false)
 
   const role = getRole()
 
@@ -32,7 +35,7 @@ export default function Busca() {
       setProduto(data)
     } catch (e: unknown) {
       const error = e as { response?: { status?: number } }
-      if (error.response?.status === 404) setErro('Produto não encontrado.')
+      if (error.response?.status === 404) setCodigoNaoEncontrado(valor)
       else if (error.response?.status === 400) setErro('Código inválido.')
       else setErro('Erro ao consultar. Tente novamente.')
     } finally {
@@ -46,6 +49,18 @@ export default function Busca() {
     handleBuscar(codigoLido)
   }
 
+  async function handleEnviarObservacao() {
+    if (!codigoNaoEncontrado) return
+    setEnviandoObs(true)
+    try {
+      await registrarNaoEncontrado(codigoNaoEncontrado, observacao.trim())
+    } finally {
+      setCodigoNaoEncontrado(null)
+      setObservacao('')
+      setEnviandoObs(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center px-4 py-10">
 
@@ -54,6 +69,40 @@ export default function Busca() {
           onLeitura={handleLeitura}
           onFechar={() => setCameras(false)}
         />
+      )}
+
+      {codigoNaoEncontrado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm flex flex-col gap-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-700">Produto não encontrado</p>
+              <p className="text-xs text-gray-400 mt-1">Código: {codigoNaoEncontrado}</p>
+            </div>
+            <textarea
+              className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              placeholder="Observação (ex: Coca Cola lata 250ml)"
+              rows={3}
+              value={observacao}
+              onChange={(e) => setObservacao(e.target.value)}
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setCodigoNaoEncontrado(null); setObservacao('') }}
+                className="flex-1 border border-gray-300 text-gray-600 font-semibold py-2 rounded-lg hover:bg-gray-50 transition"
+              >
+                Ignorar
+              </button>
+              <button
+                onClick={handleEnviarObservacao}
+                disabled={enviandoObs || !observacao.trim()}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
+              >
+                {enviandoObs ? 'Enviando...' : 'Registrar'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Header */}
