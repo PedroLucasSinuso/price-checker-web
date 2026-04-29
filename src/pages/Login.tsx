@@ -1,11 +1,7 @@
 import { useState } from 'react'
 import { login } from '../api/auth'
 import { jwtDecode } from 'jwt-decode'
-
-interface JwtPayload {
-  sub: string
-  role: string
-}
+import type { JwtPayload } from '../types'
 
 export default function Login() {
   const [username, setUsername] = useState('')

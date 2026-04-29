@@ -2,26 +2,12 @@ import { useState, useRef } from 'react'
 import { buscarProduto } from '../api/produtos'
 import AdminHeader from '../components/AdminHeader'
 import LeitorCodigo from '../components/LeitorCodigo'
+import { gerarCSV, baixarCSV, type CsvRow } from '../utils/csv'
 
 interface ItemInventario {
   codigo: string
   nome: string
   quantidade: number
-}
-
-function gerarCSV(itens: ItemInventario[]): string {
-  const linhas = itens.map(i => `${i.codigo};chamada;${i.quantidade}`)
-  return linhas.join('\n')
-}
-
-function baixarCSV(conteudo: string) {
-  const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `inventario_${new Date().toISOString().slice(0, 10)}.csv`
-  link.click()
-  URL.revokeObjectURL(url)
 }
 
 export default function Inventario() {
@@ -70,7 +56,8 @@ export default function Inventario() {
 
   function handleExportar() {
     if (itens.length === 0) return
-    baixarCSV(gerarCSV(itens))
+    const rows: CsvRow[] = itens.map(i => ({ codigo: i.codigo, tipo: 'chamada', quantidade: i.quantidade }))
+    baixarCSV(gerarCSV(rows), 'inventario')
   }
 
   const totalItens = itens.reduce((acc, i) => acc + i.quantidade, 0)

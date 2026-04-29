@@ -2,25 +2,11 @@ import { useState, useRef } from 'react'
 import { buscarProduto } from '../api/produtos'
 import AdminHeader from '../components/AdminHeader'
 import LeitorCodigo from '../components/LeitorCodigo'
+import { gerarCSV, baixarCSV, type CsvRow } from '../utils/csv'
 
 interface ItemEtiqueta {
   codigo: string
   nome: string
-}
-
-function gerarCSV(itens: ItemEtiqueta[]): string {
-  const linhas = itens.map(i => `${i.codigo};chamada;1`)
-  return linhas.join('\n')
-}
-
-function baixarCSV(conteudo: string) {
-  const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `etiquetas_${new Date().toISOString().slice(0, 10)}.csv`
-  link.click()
-  URL.revokeObjectURL(url)
 }
 
 export default function Etiquetas() {
@@ -63,7 +49,8 @@ export default function Etiquetas() {
 
   function handleExportar() {
     if (itens.length === 0) return
-    baixarCSV(gerarCSV(itens))
+    const rows: CsvRow[] = itens.map(i => ({ codigo: i.codigo, tipo: 'chamada', quantidade: 1 }))
+    baixarCSV(gerarCSV(rows), 'etiquetas')
   }
 
   return (

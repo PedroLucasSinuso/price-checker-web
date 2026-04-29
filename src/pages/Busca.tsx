@@ -3,6 +3,7 @@ import { buscarProduto } from '../api/produtos'
 import type { ProdutoBasico, ProdutoCompleto } from '../types'
 import { logout } from '../api/auth'
 import LeitorCodigo from '../components/LeitorCodigo'
+import { formatCurrency } from '../utils/formatters'
 
 function isCompleto(p: ProdutoBasico | ProdutoCompleto): p is ProdutoCompleto {
   return 'preco_custo' in p
@@ -123,7 +124,7 @@ export default function Busca() {
           <div className="border-t pt-3">
             <p className="text-xs text-gray-400 uppercase tracking-wide">Preço de Venda</p>
             <p className="text-3xl font-bold text-blue-600">
-              {produto.preco_venda.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              {formatCurrency(produto.preco_venda)}
             </p>
           </div>
 
@@ -138,7 +139,7 @@ export default function Busca() {
                 <div>
                   <p className="text-xs text-gray-400 uppercase tracking-wide">Preço de Custo</p>
                   <p className="text-sm font-semibold text-gray-700">
-                    {produto.preco_custo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    {formatCurrency(produto.preco_custo)}
                   </p>
                 </div>
               </div>

@@ -1,21 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { triggerSync, getSyncStatus, getSyncHistory } from '../api/admin'
 import AdminHeader from '../components/AdminHeader'
-
-interface SyncJob {
-  job_id: number
-  started_at: string
-  finished_at: string | null
-  status: 'sucesso' | 'em_progresso' | 'erro'
-  produtos_count: number | null
-  codigos_count: number | null
-  error_message: string | null
-}
-
-interface SyncHistory {
-  jobs: SyncJob[]
-  total: number
-}
+import type { SyncJob, SyncHistory } from '../types'
+import { formatDate } from '../utils/formatters'
 
 function StatusBadge({ status }: { status: SyncJob['status'] }) {
   const styles = {
@@ -33,11 +20,6 @@ function StatusBadge({ status }: { status: SyncJob['status'] }) {
       {labels[status]}
     </span>
   )
-}
-
-function formatDate(iso: string | null) {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleString('pt-BR')
 }
 
 export default function Admin() {
