@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 
 interface Props {
@@ -10,6 +10,9 @@ export default function LeitorCodigo({ onLeitura, onFechar }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [erro, setErro] = useState('')
   const leuRef = useRef(false)
+  const onLeituraRef = useCallback((codigo: string) => {
+    onLeitura(codigo)
+  }, [onLeitura])
 
   useEffect(() => {
     const reader = new BrowserMultiFormatReader()
@@ -19,7 +22,7 @@ export default function LeitorCodigo({ onLeitura, onFechar }: Props) {
       if (result && !leuRef.current) {
         leuRef.current = true
         BrowserMultiFormatReader.releaseAllStreams()
-        onLeitura(result.getText())
+        onLeituraRef(result.getText())
       }
     }).catch(() => {
       setErro('Não foi possível acessar a câmera. Verifique as permissões.')
@@ -28,7 +31,7 @@ export default function LeitorCodigo({ onLeitura, onFechar }: Props) {
     return () => {
       BrowserMultiFormatReader.releaseAllStreams()
     }
-  }, [])
+  }, [onLeituraRef])
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50 px-4">

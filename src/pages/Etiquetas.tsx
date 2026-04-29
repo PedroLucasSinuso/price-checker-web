@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { buscarProduto } from '../api/produtos'
 import AdminHeader from '../components/AdminHeader'
 import LeitorCodigo from '../components/LeitorCodigo'
+import { useAuth } from '../hooks/useAuth'
 import { gerarCSV, baixarCSV, type CsvRow } from '../utils/csv'
 
 interface ItemEtiqueta {
@@ -10,6 +12,8 @@ interface ItemEtiqueta {
 }
 
 export default function Etiquetas() {
+  const navigate = useNavigate()
+  const { logout } = useAuth()
   const [itens, setItens] = useState<ItemEtiqueta[]>([])
   const [erro, setErro] = useState('')
   const [camera, setCamera] = useState(false)
@@ -30,9 +34,10 @@ export default function Etiquetas() {
       const produto = await buscarProduto(codigoLimpo)
       setItens(prev => [...prev, { codigo: produto.codigo_chamada, nome: produto.nome }])
       if (inputRef.current) inputRef.current.value = ''
-    } catch (e: any) {
-      if (e.response?.status === 404) setErro('Produto não encontrado.')
-      else if (e.response?.status === 400) setErro('Código inválido.')
+    } catch (e: unknown) {
+      const error = e as { response?: { status?: number } }
+      if (error.response?.status === 404) setErro('Produto não encontrado.')
+      else if (error.response?.status === 400) setErro('Código inválido.')
       else setErro('Erro ao consultar.')
     }
   }
@@ -62,7 +67,7 @@ export default function Etiquetas() {
         />
       )}
 
-      <AdminHeader titulo="Etiquetas" paginaAtual="etiquetas" />
+      <AdminHeader titulo="Etiquetas" paginaAtual="etiquetas" onLogout={() => { logout(); navigate('/login') }} />
 
       <div className="w-full max-w-2xl flex flex-col gap-6">
 
@@ -72,6 +77,7 @@ export default function Etiquetas() {
           <div className="flex gap-2">
             <input
               ref={inputRef}
+              aria-label="Código do produto"
               className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Digite ou bipe o código"
               onKeyDown={handleKeyDown}
@@ -80,11 +86,12 @@ export default function Etiquetas() {
             <button
               onClick={() => setCamera(true)}
               className="md:hidden bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg transition"
+              aria-label="Ler código de barras"
             >
               📷
             </button>
           </div>
-          {erro && <p className="text-red-500 text-sm mt-2">{erro}</p>}
+          {erro && <p className="text-red-500 text-sm mt-2" role="alert">{erro}</p>}
         </div>
 
         {/* Lista */}
@@ -120,6 +127,7 @@ export default function Etiquetas() {
                   <button
                     onClick={() => remover(item.codigo)}
                     className="text-gray-300 hover:text-red-500 transition text-lg leading-none"
+                    aria-label={`Remover ${item.nome}`}
                   >
                     ×
                   </button>

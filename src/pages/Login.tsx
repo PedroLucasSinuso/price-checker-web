@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { login } from '../api/auth'
-import { jwtDecode } from 'jwt-decode'
-import type { JwtPayload } from '../types'
+import { useAuth } from '../hooks/useAuth'
 
 export default function Login() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -15,10 +14,7 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      const data = await login(username, password)
-      const decoded = jwtDecode<JwtPayload>(data.access_token)
-      localStorage.setItem('token', data.access_token)
-      localStorage.setItem('role', decoded.role)
+      await login(username, password)
       navigate('/', { replace: true })
     } catch {
       setError('Usuário ou senha inválidos.')
@@ -34,6 +30,7 @@ export default function Login() {
 
         <div className="flex flex-col gap-4">
           <input
+            aria-label="Usuário"
             className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Usuário"
             value={username}
@@ -42,6 +39,7 @@ export default function Login() {
           />
           <input
             type="password"
+            aria-label="Senha"
             className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Senha"
             value={password}
@@ -49,7 +47,7 @@ export default function Login() {
             onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           />
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-500 text-sm" role="alert">{error}</p>}
 
           <button
             onClick={handleSubmit}

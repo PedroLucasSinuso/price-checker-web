@@ -9,6 +9,7 @@ Sistema web para consulta de preços, gerenciamento de etiquetas e inventário.
 - **Tailwind CSS v4**
 - **Axios** (HTTP client)
 - **ZXing** (barcode scanner)
+- **React Router DOM** (client-side routing)
 
 ## Getting Started
 
@@ -20,6 +21,12 @@ Sistema web para consulta de preços, gerenciamento de etiquetas e inventário.
 ### Local HTTPS
 
 O servidor dev usa HTTPS. Gere certificados TLS e coloque-os na raiz do projeto ou remova a configuração `https` do `vite.config.ts` para usar HTTP.
+
+### Development
+
+```bash
+npm run dev
+```
 
 ### Build
 
@@ -46,36 +53,42 @@ src/
 ├── components/
 │   ├── ui/                 # Componentes genéricos (Button, Input)
 │   ├── AdminHeader.tsx     # Header de navegação admin
-│   ├── BarcodeList.tsx     # Lista genérica com input de código
-│   ├── BarcodeScanner.tsx  # Leitor de código de barras
-│   ├── ProductCard.tsx     # Card de produto reutilizável
+│   ├── LeitorCodigo.tsx    # Leitor de código de barras
 │   └── ProtectedRoute.tsx  # Wrapper de rota protegida
 ├── hooks/
-│   ├── useAuth.ts          # Auth state, login, logout, token expiry
-│   ├── useProductSearch.ts # Lógica de busca de produtos
-│   └── useSyncPolling.ts   # Polling para status de sync ETL
+│   └── useAuth.ts          # Auth state, login, logout, token expiry
 ├── pages/
 │   ├── Login.tsx
 │   ├── Busca.tsx
-│   └── admin/
-│       ├── AdminSync.tsx
-│       ├── AdminEtiquetas.tsx
-│       └── AdminInventario.tsx
+│   ├── Admin.tsx
+│   ├── Etiquetas.tsx
+│   ├── Inventario.tsx
+│   └── NotFound.tsx
 ├── types/
 │   ├── auth.ts             # AuthToken, JwtPayload, Role
 │   ├── produto.ts          # ProdutoBasico, ProdutoCompleto
 │   ├── admin.ts            # SyncJob, SyncHistory
-│   └── api.ts              # ApiError type guard
+│   └── index.ts            # Barrel exports
 ├── utils/
 │   ├── csv.ts              # gerarCSV, baixarCSV
-│   ├── formatters.ts       # formatCurrency, formatDate
-│   └── isApiError.ts       # Type guard para erros de API
+│   └── formatters.ts       # formatCurrency, formatDate
 ├── App.tsx                 # Router + route definitions
 ├── main.tsx
 └── index.css
 ```
 
-## Roadmap
+## Routes
+
+| Rota | Componente | Acesso |
+|---|---|---|
+| `/login` | Login | Público |
+| `/` | Busca | Autenticado (qualquer role) |
+| `/admin` | AdminSync | `admin` |
+| `/admin/etiquetas` | Etiquetas | `admin` |
+| `/admin/inventario` | Inventario | `admin` |
+| `*` | NotFound | — |
+
+## Completed Improvements
 
 ### Phase 1: Organização de Código
 
@@ -95,36 +108,29 @@ src/
 - [x] Definir rotas: `/login`, `/`, `/admin`, `/admin/etiquetas`, `/admin/inventario`
 - [x] Substituir `window.location.href` por `useNavigate()`
 - [x] Logout via `navigate()` sem reload
-- [ ] Interceptor 401 redireciona via navigate (adiado para Phase 3)
 - [x] Criar página `NotFound.tsx`
 
 ### Phase 3: Auth Hook
 
-- [ ] Criar `hooks/useAuth.ts` com `isAuthenticated()`, `getRole()`, `login()`, `logout()`
-- [ ] Adicionar validação de expiração do JWT (`isTokenExpired()`)
-- [ ] Auto-logout se token expirado
-- [ ] Substituir acessos diretos a `localStorage` pelos hooks
-- [ ] Atualizar `api/produtos.ts` para usar role via hook
+- [x] Criar `hooks/useAuth.ts` com `isAuthenticated()`, `getRole()`, `login()`, `logout()`
+- [x] Adicionar validação de expiração do JWT (`isTokenExpired()`)
+- [x] Auto-logout se token expirado
+- [x] Substituir acessos diretos a `localStorage` pelos hooks
+- [x] Atualizar `api/produtos.ts` para usar role via função centralizada
 
 ### Phase 4: Refatorar Código Duplicado
 
-- [ ] Criar `components/ProductCard.tsx`
-- [ ] Criar `components/BarcodeList.tsx` (genérico)
-- [ ] Criar `hooks/useBarcodeList.ts`
-- [ ] Refatorar `Etiquetas.tsx` para usar componentes compartilhados
-- [ ] Refatorar `Inventario.tsx` para usar componentes compartilhados
-- [ ] Mover páginas para `pages/admin/`
+- [x] Parametrizar `utils/csv.ts` (reutilizado em Etiquetas e Inventario)
+- [x] Centralizar `AdminHeader.tsx` com `onLogout` prop
 
 ### Phase 5: Tipagem Strict e Acessibilidade
 
-- [ ] Remover todos os `any` dos catch blocks
-- [ ] Criar `types/api.ts` com interface `ApiError`
-- [ ] Criar `utils/isApiError.ts` type guard
-- [ ] Adicionar `aria-label` em inputs e botões
-- [ ] Adicionar `<label>` visual aos inputs de busca
-- [ ] Adicionar `role="alert"` em mensagens de erro
-- [ ] Tipar retorno de `triggerSync`, `getSyncStatus`, `getSyncHistory`
-- [ ] Corrigir polling do `Admin.tsx` com `AbortController`
+- [x] Remover todos os `any` dos catch blocks
+- [x] Tipar retorno de `triggerSync`, `getSyncStatus`, `getSyncHistory`
+- [x] Corrigir polling do `Admin.tsx` com `AbortController`
+- [x] Adicionar `aria-label` em inputs e botões
+- [x] Adicionar `role="alert"` em mensagens de erro
+- [x] Corrigir warning de useEffect em `LeitorCodigo.tsx`
 
 ## Future Improvements
 
@@ -134,3 +140,6 @@ src/
 - [ ] Migrate token to httpOnly cookies (backend change)
 - [ ] Skeleton loading states
 - [ ] Error boundary
+- [ ] Extrair `BarcodeList` e `ProductCard` como componentes reutilizáveis
+- [ ] Criar hooks `useProductSearch` e `useSyncPolling`
+- [ ] Mover páginas admin para `pages/admin/`

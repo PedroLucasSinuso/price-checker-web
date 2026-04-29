@@ -1,12 +1,12 @@
 import { useNavigate } from 'react-router-dom'
-import { logout } from '../api/auth'
 
 interface Props {
   titulo: string
   paginaAtual: 'sync' | 'etiquetas' | 'inventario' | 'busca'
+  onLogout: () => void
 }
 
-export default function AdminHeader({ titulo, paginaAtual }: Props) {
+export default function AdminHeader({ titulo, paginaAtual, onLogout }: Props) {
   const navigate = useNavigate()
 
   const linkClass = (pagina: string) =>
@@ -20,7 +20,7 @@ export default function AdminHeader({ titulo, paginaAtual }: Props) {
       <div className="flex justify-between items-center mb-3">
         <h1 className="text-xl font-bold text-gray-800">{titulo}</h1>
         <button
-          onClick={() => logout(navigate)}
+          onClick={onLogout}
           className="text-sm text-gray-500 hover:text-red-500 transition"
         >
           Sair

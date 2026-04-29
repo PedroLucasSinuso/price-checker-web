@@ -1,8 +1,9 @@
 import api from './client'
+import { getRole } from './auth'
 import type { ProdutoBasico, ProdutoCompleto } from '../types'
 
 export async function buscarProduto(codigo: string): Promise<ProdutoBasico | ProdutoCompleto> {
-  const role = localStorage.getItem('role')
+  const role = getRole()
   const endpoint = role === 'supervisor' || role === 'admin'
     ? `/produtos/${codigo}/completo`
     : `/produtos/${codigo}`

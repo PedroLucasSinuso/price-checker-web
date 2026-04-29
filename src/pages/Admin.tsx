@@ -1,6 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect -- Initial data load on mount */
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { triggerSync, getSyncStatus, getSyncHistory } from '../api/admin'
 import AdminHeader from '../components/AdminHeader'
+import { useAuth } from '../hooks/useAuth'
 import type { SyncJob, SyncHistory } from '../types'
 import { formatDate } from '../utils/formatters'
 
@@ -23,11 +26,14 @@ function StatusBadge({ status }: { status: SyncJob['status'] }) {
 }
 
 export default function Admin() {
+  const navigate = useNavigate()
+  const { logout } = useAuth()
   const [history, setHistory] = useState<SyncHistory | null>(null)
   const [activeJob, setActiveJob] = useState<SyncJob | null>(null)
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   async function carregarHistorico() {
     try {
@@ -47,6 +53,10 @@ export default function Admin() {
       clearInterval(pollingRef.current)
       pollingRef.current = null
     }
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
   }
 
   async function handleSync() {
@@ -57,15 +67,17 @@ export default function Admin() {
       const { job_id } = await triggerSync()
 
       pollingRef.current = setInterval(async () => {
+        abortControllerRef.current = new AbortController()
         try {
-          const status: SyncJob = await getSyncStatus(job_id)
+          const status: SyncJob = await getSyncStatus(job_id, abortControllerRef.current.signal)
           setActiveJob(status)
           if (status.status !== 'em_progresso') {
             pararPolling()
             setLoading(false)
             carregarHistorico()
           }
-        } catch {
+        } catch (e: unknown) {
+          if ((e as Error).name === 'AbortError') return
           pararPolling()
           setLoading(false)
           setErro('Erro ao verificar status do sync.')
@@ -84,7 +96,7 @@ export default function Admin() {
     <div className="min-h-screen bg-gray-100 flex flex-col items-center px-4 py-10">
 
       {/* Header */}
-      <AdminHeader titulo="Sync ETL" paginaAtual="sync" />
+      <AdminHeader titulo="Sync ETL" paginaAtual="sync" onLogout={() => { logout(); navigate('/login') }} />
 
       {/* Trigger sync */}
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-md p-6 mb-6">
@@ -98,7 +110,7 @@ export default function Admin() {
           {loading ? 'Sincronizando...' : 'Iniciar Sync'}
         </button>
 
-        {erro && <p className="text-red-500 text-sm mt-3">{erro}</p>}
+        {erro && <p className="text-red-500 text-sm mt-3" role="alert">{erro}</p>}
 
         {/* Status do job ativo */}
         {activeJob && (
@@ -120,7 +132,7 @@ export default function Admin() {
               </p>
             )}
             {activeJob.error_message && (
-              <p className="text-sm text-red-500">{activeJob.error_message}</p>
+              <p className="text-sm text-red-500" role="alert">{activeJob.error_message}</p>
             )}
           </div>
         )}
@@ -157,7 +169,7 @@ export default function Admin() {
                   </p>
                 )}
                 {job.error_message && (
-                  <p className="text-xs text-red-500">{job.error_message}</p>
+                  <p className="text-xs text-red-500" role="alert">{job.error_message}</p>
                 )}
               </div>
             ))}

@@ -1,13 +1,6 @@
 import { Navigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import type { Role } from '../types'
-
-function isAuthenticated(): boolean {
-  return !!localStorage.getItem('token')
-}
-
-function getRole(): Role | null {
-  return localStorage.getItem('role') as Role | null
-}
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -15,6 +8,8 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+  const { isAuthenticated, getRole } = useAuth()
+
   if (!isAuthenticated()) {
     return <Navigate to="/login" replace />
   }

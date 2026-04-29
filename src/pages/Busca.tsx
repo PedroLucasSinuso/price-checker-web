@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { buscarProduto } from '../api/produtos'
 import type { ProdutoBasico, ProdutoCompleto } from '../types'
-import { logout } from '../api/auth'
+import { useAuth } from '../hooks/useAuth'
 import LeitorCodigo from '../components/LeitorCodigo'
 import { formatCurrency } from '../utils/formatters'
 
@@ -12,13 +12,14 @@ function isCompleto(p: ProdutoBasico | ProdutoCompleto): p is ProdutoCompleto {
 
 export default function Busca() {
   const navigate = useNavigate()
+  const { logout, getRole } = useAuth()
   const [codigo, setCodigo] = useState('')
   const [produto, setProduto] = useState<ProdutoBasico | ProdutoCompleto | null>(null)
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
   const [cameras, setCameras] = useState(false)
 
-  const role = localStorage.getItem('role')
+  const role = getRole()
 
   async function handleBuscar(codigoParam?: string) {
     const valor = (codigoParam ?? codigo).trim()
@@ -29,9 +30,10 @@ export default function Busca() {
     try {
       const data = await buscarProduto(valor)
       setProduto(data)
-    } catch (e: any) {
-      if (e.response?.status === 404) setErro('Produto não encontrado.')
-      else if (e.response?.status === 400) setErro('Código inválido.')
+    } catch (e: unknown) {
+      const error = e as { response?: { status?: number } }
+      if (error.response?.status === 404) setErro('Produto não encontrado.')
+      else if (error.response?.status === 400) setErro('Código inválido.')
       else setErro('Erro ao consultar. Tente novamente.')
     } finally {
       setLoading(false)
@@ -68,7 +70,7 @@ export default function Busca() {
           )}
         </div>
         <button
-          onClick={() => logout(navigate)}
+          onClick={() => { logout(); navigate('/login') }}
           className="text-sm text-gray-500 hover:text-red-500 transition"
         >
           Sair
@@ -78,6 +80,7 @@ export default function Busca() {
       {/* Input de busca */}
       <div className="w-full max-w-md flex gap-2 mb-6">
         <input
+          aria-label="Código EAN ou PLU"
           className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Digite o código EAN ou PLU"
           value={codigo}
@@ -88,6 +91,7 @@ export default function Busca() {
         <button
           onClick={() => setCameras(true)}
           className="md:hidden bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg transition"
+          aria-label="Ler código de barras"
           title="Ler código de barras"
         >
           📷
@@ -102,7 +106,7 @@ export default function Busca() {
       </div>
 
       {erro && (
-        <p className="text-red-500 text-sm mb-4">{erro}</p>
+        <p className="text-red-500 text-sm mb-4" role="alert">{erro}</p>
       )}
 
       {produto && (
