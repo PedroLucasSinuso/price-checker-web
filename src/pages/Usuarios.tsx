@@ -28,7 +28,7 @@ interface ModalEdicao {
 }
 
 export default function Usuarios() {
-  const { getRole, logout } = useAuth()
+  const { getUsername, logout } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -50,28 +50,14 @@ export default function Usuarios() {
   // Modal de edição
   const [modal, setModal] = useState<ModalEdicao | null>(null)
 
-  const meuRole = getRole()
-  const meuUsername = (() => {
-    try {
-      const token = localStorage.getItem('token')
-      if (!token) return null
-      const payload = JSON.parse(atob(token.split('.')[1]))
-      return payload.sub as string
-    } catch { return null }
-  })()
+  const meuUsername = getUsername()
 
-  async function carregar() {
-    setCarregando(true)
-    try {
-      setUsuarios(await listarUsuarios())
-    } catch {
-      setErroGeral('Erro ao carregar usuários.')
-    } finally {
-      setCarregando(false)
-    }
-  }
-
-  useEffect(() => { carregar() }, [])
+  useEffect(() => {
+    listarUsuarios()
+      .then(setUsuarios)
+      .catch(() => setErroGeral('Erro ao carregar usuários.'))
+      .finally(() => setCarregando(false))
+  }, [])
 
   async function handleCriar() {
     setErroCriacao('')
@@ -91,9 +77,10 @@ export default function Usuarios() {
       setNovoNome('')
       setNovoPassword('')
       setNovoRole('operador')
+      setCarregando(true)
       await carregar()
-    } catch (e: any) {
-      if (e.response?.status === 409) setErroCriacao('Username já existe.')
+    } catch (e: unknown) {
+      if (e instanceof Error && 'response' in e && typeof e.response === 'object' && e.response && 'status' in e.response && e.response.status === 409) setErroCriacao('Username já existe.')
       else setErroCriacao('Erro ao criar usuário.')
     } finally {
       setCriando(false)
@@ -123,6 +110,7 @@ export default function Usuarios() {
     if (!confirm(`Excluir o usuário "${usuario.nome_exibicao}"?`)) return
     try {
       await excluirUsuario(usuario.id)
+      setCarregando(true)
       await carregar()
     } catch {
       setErroGeral('Erro ao excluir usuário.')

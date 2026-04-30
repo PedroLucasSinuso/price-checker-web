@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { jwtDecode } from 'jwt-decode'
 import { login as apiLogin } from '../api/auth'
 import type { JwtPayload, Role } from '../types'
@@ -27,8 +27,6 @@ function isTokenExpired(token: string): boolean {
 }
 
 export function useAuth() {
-  const [isAuthChecked, setIsAuthChecked] = useState(false)
-
   const isAuthenticated = useCallback((): boolean => {
     const token = getToken()
     if (!token) return false
@@ -48,6 +46,13 @@ export function useAuth() {
     return payload?.role ?? (localStorage.getItem('role') as Role | null)
   }, [])
 
+  const getUsername = useCallback((): string | null => {
+    const token = getToken()
+    if (!token) return null
+    const payload = parseJwtPayload(token)
+    return payload?.sub ?? null
+  }, [])
+
   const login = useCallback(async (username: string, password: string) => {
     const data = await apiLogin(username, password)
     const decoded = jwtDecode<JwtPayload>(data.access_token)
@@ -63,9 +68,8 @@ export function useAuth() {
 
   const checkAuth = useCallback(() => {
     const valid = isAuthenticated()
-    setIsAuthChecked(true)
     return valid
   }, [isAuthenticated])
 
-  return { isAuthenticated, getRole, login, logout, checkAuth, isAuthChecked, setIsAuthChecked }
+  return { isAuthenticated, getRole, getUsername, login, logout, checkAuth }
 }
